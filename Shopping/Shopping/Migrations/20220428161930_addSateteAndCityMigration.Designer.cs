@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shopping.Data;
 
@@ -10,9 +11,10 @@ using Shopping.Data;
 namespace Shopping.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220428161930_addSateteAndCityMigration")]
+    partial class addSateteAndCityMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,7 +120,7 @@ namespace Shopping.Migrations
             modelBuilder.Entity("Shopping.Data.Entities.City", b =>
                 {
                     b.HasOne("Shopping.Data.Entities.State", "State")
-                        .WithMany("Cities")
+                        .WithMany()
                         .HasForeignKey("StateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -129,22 +131,12 @@ namespace Shopping.Migrations
             modelBuilder.Entity("Shopping.Data.Entities.State", b =>
                 {
                     b.HasOne("Shopping.Data.Entities.Country", "Country")
-                        .WithMany("States")
+                        .WithMany()
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Country");
-                });
-
-            modelBuilder.Entity("Shopping.Data.Entities.Country", b =>
-                {
-                    b.Navigation("States");
-                });
-
-            modelBuilder.Entity("Shopping.Data.Entities.State", b =>
-                {
-                    b.Navigation("Cities");
                 });
 #pragma warning restore 612, 618
         }
