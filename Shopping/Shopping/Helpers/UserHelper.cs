@@ -53,7 +53,7 @@ namespace Shopping.Helpers
         }
         public async Task<SignInResult> LoginAsync(LoginViewModel model)
         {
-            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
+            return await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, true);
         }
         public async Task<IdentityResult> AddUserAsync(User user, string password)
         {
