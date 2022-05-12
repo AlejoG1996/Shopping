@@ -210,6 +210,7 @@ namespace Shopping.Controllers
             return View(product);
         }
 
+        [NoDirectAccess]
         public async Task<IActionResult> AddImage(int? id)
         {
             if (id == null)
@@ -253,7 +254,17 @@ namespace Shopping.Controllers
                 {
                     _context.Add(productImage);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Details), new { Id = product.Id });
+                    _flashMessage.Confirmation("imagen agregada.");
+                    return Json(new
+                    {
+                        isValid = true,
+                        html = ModalHelper.RenderRazorViewToString(this, "Details", _context.Products
+                   .Include(p => p.ProductImages)
+                   .Include(p => p.ProductCategories)
+                   .ThenInclude(pc => pc.Category)
+                   .FirstOrDefaultAsync(p => p.Id == model.ProductId))
+                    });
+
                 }
                 catch (Exception exception)
                 {
@@ -261,7 +272,8 @@ namespace Shopping.Controllers
                 }
             }
 
-            return View(model);
+            return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddImage", model) });
+
         }
 
 
@@ -287,6 +299,7 @@ namespace Shopping.Controllers
             return RedirectToAction(nameof(Details), new { Id = productImage.Product.Id });
         }
 
+        [NoDirectAccess]
         public async Task<IActionResult> AddCategory(int? id)
         {
             if (id == null)
@@ -339,15 +352,27 @@ namespace Shopping.Controllers
                 {
                     _context.Add(productCategory);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Details), new { Id = product.Id });
+                    return Json(new
+                    {
+                        isValid = true,
+                        html = ModalHelper.RenderRazorViewToString(this, "Details", _context.Products
+                   .Include(p => p.ProductImages)
+                   .Include(p => p.ProductCategories)
+                   .ThenInclude(pc => pc.Category)
+                   .FirstOrDefaultAsync(p => p.Id == model.ProductId))
+                    });
+
                 }
                 catch (Exception exception)
                 {
                     _flashMessage.Danger(string.Empty, exception.Message);
                 }
+                model.Categories = await _combosHelper.GetComboCategoriesAsync();
+                return Json(new { isValid = false, html = ModalHelper.RenderRazorViewToString(this, "AddCategory", model) });
+
             }
 
-          
+
             List<Category> categories = product.ProductCategories.Select(pc => new Category
             {
                 Id = pc.Category.Id,
@@ -382,7 +407,26 @@ namespace Shopping.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> DeleteCategory(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            ProductCategory productCategory = await _context.ProductCategories
+                .Include(pc => pc.Product)
+                .FirstOrDefaultAsync(pc => pc.Id == id);
+            if (productCategory == null)
+            {
+                return NotFound();
+            }
+
+            _context.ProductCategories.Remove(productCategory);
+            await _context.SaveChangesAsync();
+            _flashMessage.Info("Registro borrado.");
+            return RedirectToAction(nameof(Details), new { Id = productCategory.Product.Id });
+        }
 
     }
 }
